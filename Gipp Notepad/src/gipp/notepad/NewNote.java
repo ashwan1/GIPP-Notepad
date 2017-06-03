@@ -32,9 +32,11 @@ public class NewNote extends javax.swing.JFrame {
     public NewNote() {
         initComponents();
     }
+    private File selectedFile = null;  //Initially selected file name in the dialog.
     private File editFile = null;
     private char[] pwd = null;
     private boolean save = false;
+    private int pwdLength = 0;
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -48,7 +50,7 @@ public class NewNote extends javax.swing.JFrame {
         LabelPwd = new javax.swing.JLabel();
         PasswordField = new javax.swing.JPasswordField();
         btnOK = new javax.swing.JButton();
-        jLabel1 = new javax.swing.JLabel();
+        jLabel2 = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
         TextAreaNote = new javax.swing.JTextArea();
         jMenuBar1 = new javax.swing.JMenuBar();
@@ -61,28 +63,33 @@ public class NewNote extends javax.swing.JFrame {
         MenuItemFont = new javax.swing.JMenuItem();
         MenuHome = new javax.swing.JMenu();
 
+        DialogPwdPrompt.setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         DialogPwdPrompt.setTitle("Encrypt File");
         DialogPwdPrompt.setAlwaysOnTop(true);
         DialogPwdPrompt.setLocation(new java.awt.Point(400, 200));
-        DialogPwdPrompt.setMinimumSize(new java.awt.Dimension(305, 165));
+        DialogPwdPrompt.setMinimumSize(new java.awt.Dimension(305, 170));
         DialogPwdPrompt.setModal(true);
-        DialogPwdPrompt.setPreferredSize(new java.awt.Dimension(305, 165));
+        DialogPwdPrompt.setPreferredSize(new java.awt.Dimension(305, 170));
         DialogPwdPrompt.setResizable(false);
 
         LabelPwd.setText("Enter Password:");
 
         PasswordField.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyPressed(java.awt.event.KeyEvent evt) {
-                PasswordFieldKeyPressed(evt);
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                PasswordFieldKeyReleased(evt);
             }
         });
 
         btnOK.setText("Encrypt");
+        btnOK.setEnabled(false);
         btnOK.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 btnOKMouseClicked(evt);
             }
         });
+
+        jLabel2.setForeground(java.awt.Color.red);
+        jLabel2.setText("(* Min 6 characters)");
 
         javax.swing.GroupLayout DialogPwdPromptLayout = new javax.swing.GroupLayout(DialogPwdPrompt.getContentPane());
         DialogPwdPrompt.getContentPane().setLayout(DialogPwdPromptLayout);
@@ -93,8 +100,9 @@ public class NewNote extends javax.swing.JFrame {
                 .addComponent(LabelPwd)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(DialogPwdPromptLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(btnOK, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(PasswordField, javax.swing.GroupLayout.PREFERRED_SIZE, 165, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnOK, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jLabel2))
                 .addContainerGap(41, Short.MAX_VALUE))
         );
         DialogPwdPromptLayout.setVerticalGroup(
@@ -104,12 +112,12 @@ public class NewNote extends javax.swing.JFrame {
                 .addGroup(DialogPwdPromptLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(LabelPwd)
                     .addComponent(PasswordField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel2)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(btnOK)
-                .addContainerGap(56, Short.MAX_VALUE))
+                .addContainerGap(52, Short.MAX_VALUE))
         );
-
-        jLabel1.setText("Enter Password:");
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Create New Note");
@@ -202,38 +210,53 @@ public class NewNote extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void MenuItemSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_MenuItemSaveActionPerformed
-        JFileChooser fileDialog = new JFileChooser();
-        FileNameExtensionFilter filter = new FileNameExtensionFilter("Only gipp files","gipp");
-        fileDialog.setFileFilter(filter);
-        File selectedFile;  //Initially selected file name in the dialog.
-        if (editFile == null)
-            selectedFile = new File("*.gipp");
-        else
-            selectedFile = new File(editFile.getName());
-        fileDialog.setSelectedFile(selectedFile); 
-        fileDialog.setDialogTitle("Save as");
-        int option = fileDialog.showSaveDialog(this);
-        if (option != JFileChooser.APPROVE_OPTION)
-            return;  // User canceled or clicked the dialog's close box.
-        selectedFile = fileDialog.getSelectedFile();
-        
-        if(selectedFile.getName().lastIndexOf(".") == -1 || !".gipp".equals(selectedFile.getName().substring(selectedFile.getName().lastIndexOf(".")))){
-            selectedFile = new File(selectedFile.getAbsoluteFile()+".gipp");
+            if (pwd == null) {
+            JFileChooser fileDialog = null;
+            if (selectedFile == null){
+                fileDialog = new JFileChooser();
+            }
+            else{
+                try {
+                    fileDialog = new JFileChooser(selectedFile.getCanonicalPath());
+                } catch (IOException ex) {
+                    Logger.getLogger(NewNote.class.getName()).log(Level.SEVERE, null, ex);
+                    fileDialog = new JFileChooser();
+                }
+            }
+            FileNameExtensionFilter filter = new FileNameExtensionFilter("Only gipp files", "gipp");
+            fileDialog.setFileFilter(filter);
+            if (editFile == null) {
+                selectedFile = new File("*.gipp");
+            } else {
+                selectedFile = new File(editFile.getName());
+            }
+            fileDialog.setSelectedFile(selectedFile);
+            fileDialog.setDialogTitle("Save as");
+            int option = fileDialog.showSaveDialog(this);
+            if (option != JFileChooser.APPROVE_OPTION) {
+                return;  // User canceled or clicked the dialog's close box.
+            }
+            selectedFile = fileDialog.getSelectedFile();
+
+            if (selectedFile.getName().lastIndexOf(".") == -1 || !".gipp".equals(selectedFile.getName().substring(selectedFile.getName().lastIndexOf(".")))) {
+                selectedFile = new File(selectedFile.getAbsoluteFile() + ".gipp");
+            }
+
+            if (selectedFile.exists()) {  // Ask the user whether to replace the file.
+                int response = JOptionPane.showConfirmDialog(this,
+                        "The file \"" + selectedFile.getName()
+                        + "\" already exists.\nDo you want to replace it?",
+                        "Confirm Save",
+                        JOptionPane.YES_NO_OPTION,
+                        JOptionPane.WARNING_MESSAGE);
+                if (response != JOptionPane.YES_OPTION) {
+                    return;  // User does not want to replace the file.
+                }
+            }
+            System.out.println("file to be saved as " + selectedFile);
+
+            promptPwd();
         }
-        
-        if (selectedFile.exists()) {  // Ask the user whether to replace the file.
-            int response = JOptionPane.showConfirmDialog( this,
-                    "The file \"" + selectedFile.getName()
-                    + "\" already exists.\nDo you want to replace it?", 
-                    "Confirm Save",
-                    JOptionPane.YES_NO_OPTION, 
-                    JOptionPane.WARNING_MESSAGE );
-            if (response != JOptionPane.YES_OPTION)
-                return;  // User does not want to replace the file.
-        }
-        System.out.println("file to be saved as "+selectedFile);
-        if(pwd == null)
-        promptPwd();
         if (save) {
             String note = TextAreaNote.getText();
             InputStream is = new ByteArrayInputStream(note.getBytes());
@@ -247,8 +270,8 @@ public class NewNote extends javax.swing.JFrame {
                 EncryptDecrypt.encrypt(128, pwd, is, output);
                 System.out.println("File encrypted successfully");
                 this.setTitle(selectedFile.getName());
-                save = false;
-                pwd = null;
+//                save = false;
+//                pwd = null;
             } catch (EncryptDecrypt.InvalidKeyLengthException | EncryptDecrypt.StrongEncryptionNotAvailableException | IOException ex) {
                 Logger.getLogger(NewNote.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -268,10 +291,19 @@ public class NewNote extends javax.swing.JFrame {
     private void promptPwd(){
         DialogPwdPrompt.setVisible(true);
         DialogPwdPrompt.setAutoRequestFocus(true);
+        PasswordField.setText(null);
     }
     
     public void setNote(String note){
         TextAreaNote.setText(note);
+    }
+
+    public void setEditFile(File editFile) {
+        this.editFile = editFile;
+    }
+
+    public void setSelectedFile(File selectedFile) {
+        this.selectedFile = selectedFile;
     }
     
     private void MenuHomeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_MenuHomeActionPerformed
@@ -309,11 +341,12 @@ public class NewNote extends javax.swing.JFrame {
 
     private void MenuItemOpenActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_MenuItemOpenActionPerformed
         GippNotepad gn = new GippNotepad();
-        File selectedFile = gn.fileChooser(this);
+        selectedFile = gn.fileChooser(this);
         if (selectedFile != null){
             System.out.println("selected file is "+selectedFile.getName());
             gn.decryptFile(selectedFile, this, this);
             this.setTitle(selectedFile.getName());
+            this.setEditFile(selectedFile);
         }
     }//GEN-LAST:event_MenuItemOpenActionPerformed
 
@@ -330,15 +363,28 @@ public class NewNote extends javax.swing.JFrame {
         onEncryptBtn();
     }//GEN-LAST:event_btnOKMouseClicked
 
-    private void PasswordFieldKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_PasswordFieldKeyPressed
-        if (evt.getKeyCode() == KeyEvent.VK_ENTER)onEncryptBtn();
-    }//GEN-LAST:event_PasswordFieldKeyPressed
+    private void PasswordFieldKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_PasswordFieldKeyReleased
+        pwdLength = PasswordField.getPassword().length;
+        System.out.println("length of password is "+pwdLength);
+        if (pwdLength > 5) {
+            btnOK.setEnabled(true);
+            if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
+                onEncryptBtn();
+            }
+        }
+        else{
+            btnOK.setEnabled(false);
+        }
+    }//GEN-LAST:event_PasswordFieldKeyReleased
 
     private void onEncryptBtn() {
         pwd = PasswordField.getPassword();
         //System.out.println("password is "+PasswordField.getText());
-        save = true;
-        DialogPwdPrompt.dispose();
+        if (pwdLength > 5) {
+            save = true;
+            DialogPwdPrompt.dispose();
+        }
+        else save = false;
     }
 
     /**
@@ -390,7 +436,7 @@ public class NewNote extends javax.swing.JFrame {
     private javax.swing.JPasswordField PasswordField;
     private javax.swing.JTextArea TextAreaNote;
     private javax.swing.JButton btnOK;
-    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JScrollPane jScrollPane1;
     // End of variables declaration//GEN-END:variables

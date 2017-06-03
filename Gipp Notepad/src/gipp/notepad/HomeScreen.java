@@ -33,7 +33,7 @@ public class HomeScreen extends javax.swing.JFrame {
         lblTitle = new javax.swing.JLabel();
         btnNew = new javax.swing.JButton();
         btnOpen = new javax.swing.JButton();
-        jLabel1 = new javax.swing.JLabel();
+        lblBg = new javax.swing.JLabel();
 
         jButton1.setText("jButton1");
 
@@ -71,8 +71,8 @@ public class HomeScreen extends javax.swing.JFrame {
         });
         getContentPane().add(btnOpen, new org.netbeans.lib.awtextra.AbsoluteConstraints(190, 140, 100, 40));
 
-        jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/gipp/notepad/binary.gif"))); // NOI18N
-        getContentPane().add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 500, 281));
+        lblBg.setIcon(new javax.swing.ImageIcon(getClass().getResource("/gipp/notepad/binary.gif"))); // NOI18N
+        getContentPane().add(lblBg, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 500, 281));
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
@@ -90,9 +90,11 @@ public class HomeScreen extends javax.swing.JFrame {
         if (selectedFile != null){
             newNote.setVisible(true);
             this.dispose();
-            System.out.println("selected file is "+selectedFile.getName());
+            System.out.println("selected file is "+selectedFile);
             gn.decryptFile(selectedFile, newNote, newNote);
+            newNote.setSelectedFile(selectedFile);
             newNote.setTitle(selectedFile.getName());
+            newNote.setEditFile(selectedFile);
         }
     }//GEN-LAST:event_btnOpenActionPerformed
 
@@ -135,7 +137,7 @@ public class HomeScreen extends javax.swing.JFrame {
     private javax.swing.JButton btnNew;
     private javax.swing.JButton btnOpen;
     private javax.swing.JButton jButton1;
-    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel lblBg;
     private javax.swing.JLabel lblTitle;
     // End of variables declaration//GEN-END:variables
 }
