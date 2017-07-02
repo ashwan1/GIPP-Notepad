@@ -18,8 +18,10 @@ public class HomeScreen extends javax.swing.JFrame {
      */
     public HomeScreen() {
         initComponents();
+        this.setIconImage(new GippNotepad().createImageIcon().getImage());
     }
-
+    
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -30,12 +32,20 @@ public class HomeScreen extends javax.swing.JFrame {
     private void initComponents() {
 
         jButton1 = new javax.swing.JButton();
+        jLabel1 = new javax.swing.JLabel();
         lblTitle = new javax.swing.JLabel();
         btnNew = new javax.swing.JButton();
         btnOpen = new javax.swing.JButton();
         lblBg = new javax.swing.JLabel();
 
         jButton1.setText("jButton1");
+
+        jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/gipp/notepad/gipp_notepad_icon.jpg"))); // NOI18N
+        jLabel1.setDisabledIcon(new javax.swing.ImageIcon(getClass().getResource("/gipp/notepad/gipp_notepad_icon.jpg"))); // NOI18N
+        jLabel1.setEnabled(false);
+        jLabel1.setFocusable(false);
+        jLabel1.setInheritsPopupMenu(false);
+        jLabel1.setOpaque(true);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("GIPP Notepad");
@@ -137,6 +147,7 @@ public class HomeScreen extends javax.swing.JFrame {
     private javax.swing.JButton btnNew;
     private javax.swing.JButton btnOpen;
     private javax.swing.JButton jButton1;
+    private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel lblBg;
     private javax.swing.JLabel lblTitle;
     // End of variables declaration//GEN-END:variables

@@ -31,6 +31,7 @@ public class NewNote extends javax.swing.JFrame {
      */
     public NewNote() {
         initComponents();
+        this.setIconImage(new GippNotepad().createImageIcon().getImage());
     }
     private File selectedFile = null;  //Initially selected file name in the dialog.
     private File editFile = null;

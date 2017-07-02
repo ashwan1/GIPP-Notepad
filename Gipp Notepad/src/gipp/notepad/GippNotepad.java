@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -37,6 +38,11 @@ public class GippNotepad {
     public static void main(String[] args) {
         HomeScreen homeScreen = new HomeScreen();
         homeScreen.setVisible(true);
+    }
+    
+    public ImageIcon createImageIcon(){
+        ImageIcon imgIcon = new ImageIcon(getClass().getResource("gipp_notepad_icon.jpg"));
+        return imgIcon;
     }
     
     public File fileChooser(Component parent){
